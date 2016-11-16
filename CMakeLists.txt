@@ -10,7 +10,7 @@ endif()
 # (you can also set it on the command line: -D CMAKE_BUILD_TYPE=Release)
 
 project(sfml-demo)
-
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 set(SFML_ROOT "/home/endargon/c++-libs/sfml-build/")
 
 # Set version information in a config.h fil
