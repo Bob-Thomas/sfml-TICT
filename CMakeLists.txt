@@ -11,14 +11,14 @@ endif ()
 
 project(sfml-demo)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
-set(SFML_ROOT "/home/endargon/c++-libs/sfml-build/")
+set(SFML_ROOT "${PROJECT_SOURCE_DIR}/thirdparty/SFML")
 
 # Set version information in a config.h fil
 include_directories("${PROJECT_BINARY_DIR}")
-
+SET(BOOST_ROOT "C:/local/boost_1_62_0")
 # Define sources and executable
 set(EXECUTABLE_NAME "sfml-demo")
-add_executable(${EXECUTABLE_NAME} main.cpp src/ball.cpp src/ball.h src/action.h src/wall.h src/wall.cpp src/storage.cpp src/storage.h)
+add_executable(${EXECUTABLE_NAME} main.cpp src/ball.cpp src/ball.h src/action.h src/wall.h src/wall.cpp src/storage.cpp src/storage.h src/movable_entity.h src/entity.h src/paddle.cpp src/paddle.h)
 
 
 # Detect and add SFML

@@ -9,41 +9,39 @@
 #include<SFML/Graphics.hpp>
 #include <stdlib.h>
 #include "math.h"
-class ball {
-private:
-    sf::CircleShape circle;
-    sf::FloatRect bounds;
-    sf::Vector2f position;
-    float speed = 2;
-    float velocity;
-    float size;
+#include "movable_entity.h"
 
-public:
+class ball : public movable_entity {
+    private:
+        sf::CircleShape circle;
+        sf::Vector2f position;
+        sf::Vector2f velocity;
+        float speed = 2;
+        float size;
 
-    ball(sf::Vector2f position, float size = 30.0);
+    public:
 
-    void draw(sf::RenderWindow &window);
+        ball(sf::Vector2f position, sf::Vector2f velocity, sf::Color color, float size = 30.0);
 
-    const sf::FloatRect getBounds() {
-        return bounds;
-    }
+        void draw(sf::RenderWindow &window) const;
 
-    void setSpeed(float speed) {
-        this->speed = speed;
-    }
-    float getSpeed() {
-        return speed;
-    }
+        void update(float delta);
 
-    void setVelocity(float velocity) {
-        this->velocity =velocity;
-    }
+        void bounce(int direction);
 
-    float getVelocity() {
-        return velocity;
-    }
+        sf::FloatRect getBounds() const;
 
-    void jump(sf::Vector2f target);
+        sf::Vector2f getPosition() const{
+            return circle.getPosition();
+        }
+
+        void setSpeed(float speed);
+
+        float getSpeed();
+
+        void setVelocity(sf::Vector2f velocity);
+
+        sf::Vector2f getVelocity();
 };
 
 #endif //SFML_DEMO_BALL_H
