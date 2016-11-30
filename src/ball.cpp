@@ -6,18 +6,16 @@
 
 ball::ball(sf::Vector2f position, float size) :
         position{position},
-        size{size} { }
-
-void ball::draw(sf::RenderWindow &window) const {
-    sf::CircleShape circle;
+        size{size} {
     circle.setRadius(size);
     circle.setPosition(position);
-    window.draw(circle);
+    bounds = circle.getGlobalBounds();
 }
 
-
-void ball::move(sf::Vector2f delta) {
-    position += delta;
+void ball::draw(sf::RenderWindow &window) {
+    sf::Vector2f new_pos(circle.getPosition().x + speed, circle.getPosition().y);
+    circle.setPosition(new_pos);
+    window.draw(circle);
 }
 
 void ball::jump(sf::Vector2f target) {
