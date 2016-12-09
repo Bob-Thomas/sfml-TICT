@@ -10,8 +10,9 @@
 #include <stdlib.h>
 #include "math.h"
 #include "movable_entity.h"
+#include "selectable.h"
 
-class ball : public movable_entity {
+class ball : public selectable {
     private:
         sf::CircleShape circle;
         sf::Vector2f position;
@@ -20,6 +21,7 @@ class ball : public movable_entity {
         float size;
 
     public:
+
 
         ball(sf::Vector2f position, sf::Vector2f velocity, sf::Color color, float size = 30.0);
 
@@ -41,7 +43,12 @@ class ball : public movable_entity {
 
         void setVelocity(sf::Vector2f velocity);
 
+        void move(sf::Vector2f pos) {
+            circle.setPosition(pos);
+        }
+
         sf::Vector2f getVelocity();
+
 };
 
 #endif //SFML_DEMO_BALL_H

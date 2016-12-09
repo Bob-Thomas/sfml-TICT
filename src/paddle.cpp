@@ -37,3 +37,21 @@ const sf::Vector2f &paddle::getVelocity() const {
 void paddle::setVelocity(const sf::Vector2f &velocity) {
     paddle::velocity = velocity;
 }
+
+int paddle::hit_direction(movable_entity &e) {
+    float dx = (getBounds().left + getBounds().width / 2) - (e.getBounds().left + e.getBounds().width / 2);
+    float dy = (getBounds().top + getBounds().height / 2) - (e.getBounds().top + e.getBounds().height / 2);
+    float width = (getBounds().width + e.getBounds().width) / 2;
+    float height = (getBounds().height + e.getBounds().height) / 2;
+    float crossWidth = width * dy;
+    float crossHeight = height * dx;
+    //
+    if (abs(dx) <= width && abs(dy) <= height) {
+        if (crossWidth > crossHeight) {
+            return (crossWidth > (-crossHeight)) ? DOWN : LEFT;
+        } else {
+            return (crossWidth > -(crossHeight)) ? RIGHT : UP;
+        }
+    }
+    return -1;
+}

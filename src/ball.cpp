@@ -7,7 +7,7 @@
 ball::ball(sf::Vector2f position, sf::Vector2f velocity, sf::Color color, float size) :
         position{position},
         velocity(velocity),
-        size{size} {
+        size(size) {
     circle.setFillColor(color);
     circle.setRadius(size);
     circle.setPosition(position);

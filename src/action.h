@@ -13,47 +13,52 @@
 #include "paddle.h"
 
 class action {
-    private:
-        std::function<bool()> condition;
-        std::function<void()> work;
+private:
+    std::function<bool()> condition;
+    std::function<void()> work;
 
-    public:
-        action(
-                sf::Keyboard::Key key,
-                std::function<void()> work
-        ) :
-                condition(
-                        [key]() -> bool { return sf::Keyboard::isKeyPressed(key); }
-                ),
-                work(work) { };
+public:
+    action(
+            sf::Keyboard::Key key,
+            std::function<void()> work
+    ) :
+            condition(
+                    [key]() -> bool { return sf::Keyboard::isKeyPressed(key); }
+            ),
+            work(work) { };
 
-        action(
-                sf::Mouse::Button button,
-                std::function<void()> work
-        ) :
-                condition(
-                        [button]() -> bool { return sf::Mouse::isButtonPressed(button); }),
-                work(work) { }
+    action(
+            sf::Mouse::Button button,
+            std::function< void() > work
+    ) :
+            condition([button]()->bool { return sf::Mouse::isButtonPressed( button );}),work(work){}
 
-        action(ball &b, wall &w, std::function<void()> work)
-                : condition([&w, &b]() -> bool {
-            return b.getBounds().intersects(w.getBounds());
-        }),
-                  work(work) { }
 
-        action(std::function<bool()> test, std::function<void()> work) :
+    action(
+            sf::Event *event,
+            std::function<void()> work
+    ) :
+            condition([event]() -> bool { std::cout << event->type << "\n"; return event->type == sf::Event::MouseMoved;}), work(work) { }
+
+    action(ball &b, wall &w, std::function<void()> work)
+            : condition([&w, &b]() -> bool {
+        return b.getBounds().intersects(w.getBounds());
+    }),
+              work(work) { }
+
+    action(std::function<bool()> test, std::function<void()> work) :
             condition([test]() -> bool {
                 return test();
-            }), work(work){}
+            }), work(work) { }
 
-        action(std::function<void()> work)
-                : condition([]() -> bool { return true; }), work(work) { }
+    action(std::function<void()> work)
+            : condition([]() -> bool { return true; }), work(work) { }
 
-        void operator()() {
-            if (condition()) {
-                work();
-            }
+    void operator()() {
+        if (condition()) {
+            work();
         }
+    }
 };
 
 #endif //SFML_DEMO_ACTION_H

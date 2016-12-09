@@ -5,39 +5,58 @@
 
 sf::Vector2f Vector2f_from_Vector2i(sf::Vector2i vector2);
 
+/**
+ * 18.3. Week 3 : Factory
+Maak een klasse hierargie van beweegbare scherm objecten. Handel het selecteren en bewegen af in de superklasse.
+
+Maak een factory function die scherm objecten creeert: circle, rectangle, line, picture. Ieder object heeft een positie, en behalve picture ook nog een kleur, circle heeft een diameter, en line en rectange een tweede punt (positie is het eerste punt). Check alle fouten die kunnen optreden en genereer daarvoor passende exceptions. Let ook op einde-file.
+
+Maak een applicatie die
+De objecten lees uit een text file en toont,
+Je de gelegenheid biedt ze te slecteren en te verschuiven,
+Bij het afsluiten de textfile overschrijft met de nieuwe lijst van objecten.
+
+Sla de (pointers naar) de objecten op in een container waar je tijdens het afbeelden en afhandeklen van gebruikershandelingen met een for( : ) loop doorheen loopt.
+
+Let op wat je doet als er een fout wordt geconstateerd in de textfile. Zorg er in ieder geval voor dat de gebruiker duidelijk te zien krijgt wat de fout is, en dat de textfile niet overschreven wordt.
+ */
+
 int main() {
 
     sf::RenderWindow window{sf::VideoMode{640, 480}, "Game"};
-    ball my_ball{sf::Vector2f{30, 30.0}, sf::Vector2f(400, 100), sf::Color::Blue};
-    paddle my_paddle{sf::Vector2f{320.0, 240.0}, sf::Vector2f(0, 0), sf::Color::Yellow};
-    wall walls[4];
 
-    walls[0] = {sf::Vector2f(0.0, 0.0), sf::Vector2f(window.getSize().x, 20), sf::Color::Red}; //top
-    walls[1] = {sf::Vector2f(window.getSize().x - 20, 0.0), sf::Vector2f(20.0, window.getSize().y),
-                sf::Color::Red}; // right
-    walls[2] = {sf::Vector2f(0.0, window.getSize().y - 20), sf::Vector2f(window.getSize().x, 20.0),
-                sf::Color::Red}; //bottom
-    walls[3] = {sf::Vector2f(0.0, 0.0), sf::Vector2f(20.0, window.getSize().y), sf::Color::Red}; //left
+    ball my_ball({100, 100}, {0, 0}, sf::Color::Red);
+    sf::Event event;
+
+    selectable *drawables[] = {
+            &my_ball
+    };
 
     action actions[] = {
-            action([&] { my_paddle.setVelocity({0,0});}),
-            action(sf::Keyboard::Left,
-                   [&] { my_paddle.setVelocity(sf::Vector2f(-300, 0.0)); }),
-            action(sf::Keyboard::Right,
-                   [&] { my_paddle.setVelocity(sf::Vector2f(300, 0.0)); }),
-            action(sf::Keyboard::Up, [&] { my_paddle.setVelocity(sf::Vector2f(0.0, -300)); }),
-            action(sf::Keyboard::Down,
-                   [&] { my_paddle.setVelocity(sf::Vector2f(0.0, 300)); }),
+            action([&] {
+                for (selectable *e : drawables) {
+                    e->deselect();
+                }
+            }),
+            action(
+                    sf::Mouse::Left,
+                    [&]{
+                        for (selectable *e : drawables) {
+                            e->select(Vector2f_from_Vector2i(sf::Mouse::getPosition()));
+                        }
+                    }
+            ),
+            action(
+                    &event,
+                    [&]{
+                        for (selectable *e : drawables) {
+                            if(e->is_selected()) {
+                                e->drag(Vector2f_from_Vector2i(sf::Mouse::getPosition()));
+                            }
+                        }
+                    }
+            )
 
-            action([&]() -> bool{ return my_paddle.hit_direction(my_ball) == UP;}, [&] { my_ball.bounce(1);}),
-            action([&]() -> bool{ return my_paddle.hit_direction(my_ball) == RIGHT;}, [&] { my_ball.bounce(-1);}),
-            action([&]() -> bool{ return my_paddle.hit_direction(my_ball) == DOWN;}, [&] { my_ball.bounce(1);}),
-            action([&]() -> bool{ return my_paddle.hit_direction(my_ball) == LEFT;}, [&] { my_ball.bounce(-1);}),
-
-            action(my_ball, walls[0], [&] { my_ball.bounce(1); }),
-            action(my_ball, walls[1], [&] { my_ball.bounce(-1); }),
-            action(my_ball, walls[2], [&] { my_ball.bounce(1); }),
-            action(my_ball, walls[3], [&] { my_ball.bounce(-1); })
     };
 
     sf::Clock clock;
@@ -47,7 +66,6 @@ int main() {
     const sf::Time update_ms = sf::seconds(1.f / 60.f);
 
     while (window.isOpen()) {
-        sf::Event event;
         while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed)
                 window.close();
@@ -58,16 +76,12 @@ int main() {
             for (auto &action : actions) {
                 action();
             }
-            my_ball.update(delta);
-            my_paddle.update(delta);
             elapsed -= update_ms;
         }
         window.clear();
-        for (wall &w : walls) {
-            w.draw(window);
+        for (entity *e : drawables) {
+            e->draw(window);
         }
-        my_ball.draw(window);
-        my_paddle.draw(window);
         window.display();
     }
 
