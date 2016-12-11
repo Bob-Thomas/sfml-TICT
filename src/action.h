@@ -8,7 +8,7 @@
 #include <functional>
 #include <SFML/Window.hpp>
 #include <iostream>
-#include "wall.h"
+#include "square.h"
 #include "storage.h"
 #include "paddle.h"
 
@@ -40,7 +40,7 @@ public:
     ) :
             condition([event]() -> bool { std::cout << event->type << "\n"; return event->type == sf::Event::MouseMoved;}), work(work) { }
 
-    action(ball &b, wall &w, std::function<void()> work)
+    action(ball &b, square w, std::function<void()> work)
             : condition([&w, &b]() -> bool {
         return b.getBounds().intersects(w.getBounds());
     }),

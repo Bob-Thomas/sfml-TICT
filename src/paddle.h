@@ -31,6 +31,9 @@ public:
 
     void update(float delta);
 
+    void input(sf::Event& e){}
+
+
     sf::Vector2f getPosition() const;
 
     void setPosition(const sf::Vector2f &position);

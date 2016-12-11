@@ -17,6 +17,9 @@ class entity {
         virtual sf::FloatRect getBounds() const = 0;
 
         virtual sf::Vector2f getPosition() const = 0;
+
+        virtual void update(float delta) = 0;
+        virtual void input(sf::Event& event) = 0;
 };
 
 #endif //SFML_DEMO_ENTITY_H

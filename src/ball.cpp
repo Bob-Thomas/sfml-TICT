@@ -17,9 +17,6 @@ void ball::draw(sf::RenderWindow &window) const {
     window.draw(circle);
 }
 
-void ball::update(float delta) {
-    circle.setPosition(circle.getPosition() + (delta * velocity));
-}
 
 void ball::bounce(int direction) {
     velocity = sf::Vector2f{direction * velocity.x, -direction * velocity.y};
@@ -43,4 +40,10 @@ sf::Vector2f ball::getVelocity() {
 
 void ball::setSpeed(float speed) {
     this->speed = speed;
+}
+
+void ball::update(float delta) {
+    if(!draggin) {
+        move(circle.getPosition() + (delta * velocity));
+    }
 }

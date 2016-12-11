@@ -10,7 +10,6 @@
 
 class movable_entity : public entity {
     public:
-        virtual void update(float delta) = 0;
         virtual void move(sf::Vector2f pos) = 0;
 };
 
