@@ -7,6 +7,7 @@
 ball::ball(sf::Vector2f position, sf::Vector2f velocity, sf::Color color, float size) :
         position{position},
         velocity(velocity),
+        color(color),
         size(size) {
     circle.setFillColor(color);
     circle.setRadius(size);
@@ -43,7 +44,7 @@ void ball::setSpeed(float speed) {
 }
 
 void ball::update(float delta) {
-    if(!draggin) {
+    if (!draggin) {
         move(circle.getPosition() + (delta * velocity));
     }
 }

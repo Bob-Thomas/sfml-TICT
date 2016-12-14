@@ -1,11 +1,13 @@
 #include<SFML/Graphics.hpp>
+#include <fstream>
+#include <stdlib.h>
 #include"src/ball.h"
 #include "src/action.h"
 #include "src/paddle.h"
 #include "src/draggable_square.h"
 #include "src/draggable_line.h"
 #include "src/draggable_photo.h"
-#include "src/object_loader.h"
+#include "src/exceptions.h"
 
 sf::Vector2f Vector2f_from_Vector2i(sf::Vector2i vector2);
 
@@ -31,47 +33,112 @@ Let op wat je doet als er een fout wordt geconstateerd in de textfile. Zorg er i
 
  */
 
+const struct {
+    const char *name;
+    sf::Color color;
+} colors[]{
+        {"yellow", sf::Color::Yellow},
+        {"red",    sf::Color::Red},
+        {"blue",    sf::Color::Blue},
+};
+
+std::ifstream &operator>>(std::ifstream &input, sf::Vector2f &rhs) {
+    char c;
+    if (!(input >> c)) { throw end_of_file(); }
+    if (c != '(') { throw invalid_position(c); }
+
+    if (!(input >> rhs.x)) {
+
+    }
+
+    if (!(input >> c)) {
+
+    }
+    if (!(input >> rhs.y)) {
+
+    }
+
+    if (!(input >> c)) {
+
+    }
+    if (c != ')') { throw invalid_position(c); }
+
+    return input;
+}
+
+std::ifstream &operator>>(std::ifstream &input, sf::Color &rhs) {
+    std::string s;
+    input >> s;
+    for (auto const &color : colors) {
+        if (color.name == s) {
+            rhs = color.color;
+            return input;
+        }
+    }
+    if (s == "") {
+        throw end_of_file();
+    }
+    throw unknown_color(s);
+}
+
+entity *screen_object_read(std::ifstream &input) {
+    sf::Vector2f position;
+    std::string name;
+    input >> position >> name;
+
+    std::cout << position.x << " | " << position.y << "\n";
+    std::cout << name;
+
+    if (name == "CIRCLE") {
+        int radius;
+        sf::Color color;
+        input >> color;
+        input >> radius;
+        return new ball(position, {0, 0}, color, radius);
+
+    } else if (name == "RECTANGLE") {
+        sf::Vector2f size;
+        sf::Color color;
+        input >> color;
+        input >> size;
+        return new draggable_square(position, size, color);
+
+    } else if (name == "PICTURE") {
+        std::string src;
+        input >> src;
+        src = "./assets/images/"+src;
+        return new draggable_photo(src, position, {1, 1});
+
+    } else if (name == "") {
+        throw end_of_file();
+    }
+
+    throw unknown_shape(name);
+}
+
 int main() {
 
     sf::RenderWindow window{sf::VideoMode{640, 480}, "Game"};
 
-    ball my_ball({100, 100}, {800, 100}, sf::Color::Red);
 
-    square walls[4];
-
-    walls[0] = {sf::Vector2f(0.0, 0.0), sf::Vector2f(window.getSize().x, 20), sf::Color::Red}; //top
-    walls[1] = {sf::Vector2f(window.getSize().x - 20, 0.0), sf::Vector2f(20.0, window.getSize().y),
-                sf::Color::Red}; // right
-    walls[2] = {sf::Vector2f(0.0, window.getSize().y - 20), sf::Vector2f(window.getSize().x, 20.0),
-                sf::Color::Red}; //bottom
-    walls[3] = {sf::Vector2f(0.0, 0.0), sf::Vector2f(20.0, window.getSize().y), sf::Color::Red}; //left
-
-    draggable_square d_square(sf::Vector2f(200, 200), sf::Vector2f(200, 200), sf::Color::Red);
-    draggable_line d_line(sf::Vector2f(30, 150), sf::Color::Blue);
-    draggable_photo d_photo("./assets/images/bird.jpg", sf::Vector2f(30, 150), {0.25, 0.25});
-
-    object_loader loader("./assets/config/saved.magic");
-
-    loader.get_loaded_entities();
 
     sf::Event event;
 
-    std::vector<entity*> entities = std::vector<entity*>();
-    entities.push_back(&my_ball);
-    entities.push_back(&walls[0]);
-    entities.push_back(&walls[1]);
-    entities.push_back(&walls[2]);
-    entities.push_back(&walls[3]);
-    entities.push_back(&d_square);
-    entities.push_back(&d_line);
-    entities.push_back(&d_photo);
+    std::vector<entity *> entities = std::vector<entity *>();
 
-    action actions[] = {
-            action(my_ball, walls[0], [&] { my_ball.bounce(1); }),
-            action(my_ball, walls[1], [&] { my_ball.bounce(-1); }),
-            action(my_ball, walls[2], [&] { my_ball.bounce(1); }),
-            action(my_ball, walls[3], [&] { my_ball.bounce(-1); })
-    };
+    {
+        std::ifstream input("./assets/config/objects.magic");
+        try {
+            for (; ;) {
+                entities.push_back(screen_object_read(input));
+            }
+        } catch (end_of_file) {
+            std::cout <<  "\nEOF\n";
+            // do nothing
+        } catch (std::exception &problem) {
+            std::cout << problem.what();
+        }
+    }
 
     sf::Clock clock;
     sf::Time elapsed = clock.restart();
@@ -84,23 +151,20 @@ int main() {
             if (event.type == sf::Event::Closed)
                 window.close();
 
-            for(entity *e: entities) {
+            for (entity *e: entities) {
                 e->input(event);
             }
         }
         elapsed += clock.restart();
         while (elapsed >= update_ms) {
             float delta = update_ms.asSeconds();
-            for (auto &action : actions) {
-                action();
-            }
-            for(entity* e: entities) {
+            for (entity *e: entities) {
                 e->update(delta);
             }
             elapsed -= update_ms;
         }
         window.clear();
-        for (entity* e : entities) {
+        for (entity *e : entities) {
             e->draw(window);
         }
         window.display();

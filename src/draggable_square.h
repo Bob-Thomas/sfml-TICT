@@ -11,8 +11,9 @@
 class draggable_square :  public selectable {
     sf::RectangleShape shape;
     sf::Vector2f position;
+    sf::Color color;
 public:
-    draggable_square(sf::Vector2f position, sf::Vector2f size, sf::Color color){
+    draggable_square(sf::Vector2f position, sf::Vector2f size, sf::Color color) : position(position), color(color){
         shape.setPosition(position);
         shape.setSize(size);
         shape.setFillColor(color);

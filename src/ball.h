@@ -18,6 +18,7 @@ private:
     sf::CircleShape circle;
     sf::Vector2f position;
     sf::Vector2f velocity;
+    sf::Color color;
     float speed = 2;
     float size;
 
