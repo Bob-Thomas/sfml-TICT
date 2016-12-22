@@ -24,9 +24,7 @@ public:
 
     int hit_direction(movable_entity &e);
 
-    void move(sf::Vector2f pos) {
-        shape.setPosition(pos);
-    }
+        void move(sf::Vector2f pos);
     sf::FloatRect getBounds() const;
 
     void update(float delta);

@@ -55,3 +55,7 @@ int paddle::hit_direction(movable_entity &e) {
     }
     return -1;
 }
+
+void paddle::move(sf::Vector2f pos) {
+    shape.setPosition(pos);
+}

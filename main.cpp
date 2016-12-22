@@ -1,14 +1,11 @@
 #include<SFML/Graphics.hpp>
 #include <fstream>
-#include <stdlib.h>
 #include"src/ball.h"
 #include "src/action.h"
-#include "src/paddle.h"
 #include "src/draggable_square.h"
 #include "src/draggable_line.h"
 #include "src/draggable_photo.h"
 #include "src/exceptions.h"
-#include "src/colors.h"
 
 sf::Vector2f Vector2f_from_Vector2i(sf::Vector2i vector2);
 
@@ -44,14 +41,14 @@ std::ifstream &operator>>(std::ifstream &input, sf::Vector2f &rhs) {
     }
 
     if (!(input >> c)) {
-
+        throw (invalid_character(c));
     }
     if (!(input >> rhs.y)) {
-
+        throw (invalid_position(c));
     }
 
     if (!(input >> c)) {
-
+        throw (invalid_character(c));
     }
     if (c != ')') { throw invalid_position(c); }
 
@@ -113,15 +110,18 @@ entity *screen_object_read(std::ifstream &input) {
 
 int main() {
 
-    sf::RenderWindow window{sf::VideoMode{640, 480}, "Game"};
-
+    sf::RenderWindow window{sf::VideoMode{1920, 1080}, "Game"};
+    std::string file("./assets/config/objects.magic");
 
     sf::Event event;
 
     std::vector<entity *> entities = std::vector<entity *>();
 
     {
-        std::ifstream input("./assets/config/objects.magic");
+        std::ifstream input(file);
+        if (!input.good()) {
+            throw (unknown_file(file));
+        }
         try {
             for (; ;) {
                 entities.push_back(screen_object_read(input));
@@ -132,6 +132,7 @@ int main() {
         } catch (std::exception &problem) {
             std::cout << problem.what();
         }
+        input.close();
     }
 
     sf::Clock clock;
@@ -145,14 +146,28 @@ int main() {
             if (event.type == sf::Event::Closed) {
                 std::ofstream output("./assets/config/objects.magic");
                 for (entity *e : entities) {
-                    selectable *pb2 = static_cast<selectable *>(e);   // safe conversion
-                    pb2->write(output);
+                    e->write(output);
                     output << "\n";
                 }
                 output.close();
                 window.close();
             }
+            if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Right) {
+                bool test = false;
+                entity *teste;
+                for(entity *e : entities) {
+                    if (e->getBounds().contains(sf::Vector2f(event.mouseButton.x, event.mouseButton.y))) {
+                        test = true;
+                        teste = e;
+                        break;
+                    }
+                }
+                if(test)
+                    entities.erase(std::remove(entities.begin(), entities.end(), teste), entities.end());
+                else
+                    entities.push_back(new ball(sf::Vector2f(event.mouseButton.x, event.mouseButton.y), {0, 0}, sf::Color::Red,30));
 
+            }
             for (entity *e: entities) {
                 e->input(event);
             }
@@ -164,9 +179,6 @@ int main() {
                 e->update(delta);
             }
 
-            if(sf::Mouse::isButtonPressed(sf::Mouse::Right)) {
-
-            }
             elapsed -= update_ms;
         }
         window.clear();

@@ -9,42 +9,26 @@
 
 #ifndef SFML_DEMO_DRAGGABLE_PHOTO_H
 #define SFML_DEMO_DRAGGABLE_PHOTO_H
+
 class draggable_photo : public selectable {
-    sf::Sprite sprite;
-    sf::Texture texture;
-    sf::Vector2f position;
-    std::string src;
-public:
-    draggable_photo(std::string src, sf::Vector2f pos, sf::Vector2f scale) : position(pos), src(src) {
-        sprite.setPosition(position);
-        texture.loadFromFile(src);
-        sprite.setTexture(texture, true);
-        sprite.setScale(scale);
+        sf::Sprite sprite;
+        sf::Texture texture;
+        sf::Vector2f position;
+        std::string src;
+    public:
+        draggable_photo(std::string src, sf::Vector2f pos, sf::Vector2f scale);
 
-    }
-    virtual void draw(sf::RenderWindow &w) const {
-        w.draw(sprite);
-    }
+        virtual void draw(sf::RenderWindow &w) const;
 
-    void write(std::ofstream &s) {
-        s << "(" << position.x << "," << position.y << ") ";
-        s << "PICTURE ";
-        s << src;
-    }
+        void write(std::ofstream &s);
 
-    virtual sf::FloatRect getBounds() const {
-        return sprite.getGlobalBounds();
-    }
+        virtual sf::FloatRect getBounds() const;
 
-    virtual sf::Vector2f getPosition() const {
-        return sprite.getPosition();
-    }
+        virtual sf::Vector2f getPosition() const;
 
-    virtual void move(sf::Vector2f position) {
-        this->position = position;
-        sprite.setPosition(position);
-    }
+        virtual void move(sf::Vector2f position);
 
 
 };
+
 #endif //SFML_DEMO_DRAGGABLE_PHOTO_H

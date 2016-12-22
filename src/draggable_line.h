@@ -14,45 +14,22 @@
 struct colors;
 
 class draggable_line : public selectable {
-    sf::RectangleShape shape;
-    sf::Vector2f position;
-    sf::Color color;
-public:
-    draggable_line(sf::Vector2f start, sf::Color color) : position(start), color(color) {
-        shape = sf::RectangleShape(start);
-        shape.setFillColor(color);
+        sf::RectangleShape shape;
+        sf::Vector2f position;
+        sf::Color color;
+    public:
+        draggable_line(sf::Vector2f start, sf::Color color);
 
-    }
-
-    void draw(sf::RenderWindow &w) const {
-        w.draw(shape);
-    };
+        void draw(sf::RenderWindow &w) const;;
 
 
-    void move(sf::Vector2f position) {
-        this->position = position;
-        shape.setPosition(position);
-    }
+        void move(sf::Vector2f position);
 
-    sf::FloatRect getBounds() const {
-        return shape.getGlobalBounds();
-    };
+        sf::FloatRect getBounds() const;;
 
-    sf::Vector2f getPosition() const {
-        return shape.getPosition();
-    }
+        sf::Vector2f getPosition() const;
 
-    void write(std::ofstream &s) {
-        s << "(" << position.x << "," << position.y << ") ";
-        s << "LINE ";
-        for (auto c : colors) {
-            if (c.color == color) {
-                s << c.name << " ";
-                break;
-            }
-        }
-
-    }
+        void write(std::ofstream &s);
 
 };
 

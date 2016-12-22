@@ -16,56 +16,43 @@
 #include <fstream>
 
 class ball : public selectable {
-private:
-    sf::CircleShape circle;
-    sf::Vector2f position;
-    sf::Vector2f velocity;
-    sf::Color color;
-    float speed = 2;
-    int radius;
+    private:
+        sf::CircleShape circle;
+        sf::Vector2f position;
+        sf::Vector2f velocity;
+        sf::Color color;
+        float speed = 2;
+        int radius;
 
-public:
+    public:
 
 
-    ball(sf::Vector2f position, sf::Vector2f velocity, sf::Color color, int radius = 30);
+        ball(sf::Vector2f position, sf::Vector2f velocity, sf::Color color, int radius = 30);
 
-    void draw(sf::RenderWindow &window) const;
+        void draw(sf::RenderWindow &window) const;
 
-    void bounce(int direction);
+        void bounce(int direction);
 
-    sf::FloatRect getBounds() const;
+        sf::FloatRect getBounds() const;
 
-    sf::Vector2f getPosition() const {
-        return circle.getPosition();
-    }
+        sf::Vector2f getPosition() const;
 
-    void update(float delta);
+        void update(float delta);
 
-    void setSpeed(float speed);
+        void setSpeed(float speed);
 
-    float getSpeed();
+        float getSpeed();
 
-    void setVelocity(sf::Vector2f velocity);
+        void setVelocity(sf::Vector2f velocity);
 
-    void move(sf::Vector2f position) {
-        this->position = position;
-        circle.setPosition(position);
-    }
-
-    sf::Vector2f getVelocity();
-
-    void write(std::ofstream &s) {
-        s << "(" << position.x << "," << position.y << ") ";
-        s << "CIRCLE ";
-        for(auto c : colors) {
-            if(c.color == color) {
-                s << c.name << " ";
-                break;
-            }
+        void move(sf::Vector2f position) {
+            this->position = position;
+            circle.setPosition(position);
         }
-        s << radius;
 
-    }
+        sf::Vector2f getVelocity();
+
+        void write(std::ofstream &s);
 };
 
 #endif //SFML_DEMO_BALL_H

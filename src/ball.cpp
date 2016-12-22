@@ -48,3 +48,20 @@ void ball::update(float delta) {
         move(circle.getPosition() + (delta * velocity));
     }
 }
+
+sf::Vector2f ball::getPosition() const {
+    return circle.getPosition();
+}
+
+void ball::write(std::ofstream &s) {
+    s << "(" << position.x << "," << position.y << ") ";
+    s << "CIRCLE ";
+    for(auto c : colors) {
+        if(c.color == color) {
+            s << c.name << " ";
+            break;
+        }
+    }
+    s << radius;
+
+}
