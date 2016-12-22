@@ -8,6 +8,8 @@
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
 #include "selectable.h"
+#include "colors.h"
+#include <fstream>
 
 struct colors;
 
@@ -16,7 +18,7 @@ class draggable_line : public selectable {
     sf::Vector2f position;
     sf::Color color;
 public:
-    draggable_line(sf::Vector2f start, sf::Color color) : position(start), color(color){
+    draggable_line(sf::Vector2f start, sf::Color color) : position(start), color(color) {
         shape = sf::RectangleShape(start);
         shape.setFillColor(color);
 
@@ -28,6 +30,7 @@ public:
 
 
     void move(sf::Vector2f position) {
+        this->position = position;
         shape.setPosition(position);
     }
 
@@ -37,6 +40,18 @@ public:
 
     sf::Vector2f getPosition() const {
         return shape.getPosition();
+    }
+
+    void write(std::ofstream &s) {
+        s << "(" << position.x << "," << position.y << ") ";
+        s << "LINE ";
+        for (auto c : colors) {
+            if (c.color == color) {
+                s << c.name << " ";
+                break;
+            }
+        }
+
     }
 
 };

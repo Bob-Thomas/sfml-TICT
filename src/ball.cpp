@@ -4,13 +4,13 @@
 
 #include "ball.h"
 
-ball::ball(sf::Vector2f position, sf::Vector2f velocity, sf::Color color, float size) :
+ball::ball(sf::Vector2f position, sf::Vector2f velocity, sf::Color color, int radius) :
         position{position},
         velocity(velocity),
         color(color),
-        size(size) {
+        radius(radius) {
     circle.setFillColor(color);
-    circle.setRadius(size);
+    circle.setRadius(radius);
     circle.setPosition(position);
 }
 

@@ -9,8 +9,8 @@
 #include "entity.h"
 
 class movable_entity : public entity {
-    public:
-        virtual void move(sf::Vector2f pos) = 0;
+public:
+    virtual void move(sf::Vector2f pos) = 0;
 };
 
 #endif //SFML_DEMO_MOVABLE_ENTITY_H

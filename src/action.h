@@ -9,7 +9,6 @@
 #include <SFML/Window.hpp>
 #include <iostream>
 #include "square.h"
-#include "storage.h"
 #include "paddle.h"
 
 class action {

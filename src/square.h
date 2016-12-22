@@ -26,6 +26,10 @@ public:
 
     void input(sf::Event &e) { }
 
+    void write(std::ofstream &s) {
+
+    }
+
     sf::FloatRect getBounds() const;
 
     sf::Vector2f getPosition() const {

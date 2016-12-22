@@ -8,6 +8,7 @@
 #include "src/draggable_line.h"
 #include "src/draggable_photo.h"
 #include "src/exceptions.h"
+#include "src/colors.h"
 
 sf::Vector2f Vector2f_from_Vector2i(sf::Vector2i vector2);
 
@@ -33,22 +34,13 @@ Let op wat je doet als er een fout wordt geconstateerd in de textfile. Zorg er i
 
  */
 
-const struct {
-    const char *name;
-    sf::Color color;
-} colors[]{
-        {"yellow", sf::Color::Yellow},
-        {"red",    sf::Color::Red},
-        {"blue",    sf::Color::Blue},
-};
-
 std::ifstream &operator>>(std::ifstream &input, sf::Vector2f &rhs) {
     char c;
     if (!(input >> c)) { throw end_of_file(); }
     if (c != '(') { throw invalid_position(c); }
 
     if (!(input >> rhs.x)) {
-
+        throw invalid_position(c);
     }
 
     if (!(input >> c)) {
@@ -86,9 +78,6 @@ entity *screen_object_read(std::ifstream &input) {
     std::string name;
     input >> position >> name;
 
-    std::cout << position.x << " | " << position.y << "\n";
-    std::cout << name;
-
     if (name == "CIRCLE") {
         int radius;
         sf::Color color;
@@ -96,7 +85,13 @@ entity *screen_object_read(std::ifstream &input) {
         input >> radius;
         return new ball(position, {0, 0}, color, radius);
 
-    } else if (name == "RECTANGLE") {
+    }
+    else if (name == "LINE") {
+        sf::Color color;
+        input >> color;
+        return new draggable_line(position, color);
+    }
+    else if (name == "RECTANGLE") {
         sf::Vector2f size;
         sf::Color color;
         input >> color;
@@ -106,7 +101,7 @@ entity *screen_object_read(std::ifstream &input) {
     } else if (name == "PICTURE") {
         std::string src;
         input >> src;
-        src = "./assets/images/"+src;
+        src = src;
         return new draggable_photo(src, position, {1, 1});
 
     } else if (name == "") {
@@ -121,7 +116,6 @@ int main() {
     sf::RenderWindow window{sf::VideoMode{640, 480}, "Game"};
 
 
-
     sf::Event event;
 
     std::vector<entity *> entities = std::vector<entity *>();
@@ -133,7 +127,7 @@ int main() {
                 entities.push_back(screen_object_read(input));
             }
         } catch (end_of_file) {
-            std::cout <<  "\nEOF\n";
+            std::cout << "\nEOF\n";
             // do nothing
         } catch (std::exception &problem) {
             std::cout << problem.what();
@@ -148,8 +142,16 @@ int main() {
 
     while (window.isOpen()) {
         while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed)
+            if (event.type == sf::Event::Closed) {
+                std::ofstream output("./assets/config/objects.magic");
+                for (entity *e : entities) {
+                    selectable *pb2 = static_cast<selectable *>(e);   // safe conversion
+                    pb2->write(output);
+                    output << "\n";
+                }
+                output.close();
                 window.close();
+            }
 
             for (entity *e: entities) {
                 e->input(event);
@@ -160,6 +162,10 @@ int main() {
             float delta = update_ms.asSeconds();
             for (entity *e: entities) {
                 e->update(delta);
+            }
+
+            if(sf::Mouse::isButtonPressed(sf::Mouse::Right)) {
+
             }
             elapsed -= update_ms;
         }

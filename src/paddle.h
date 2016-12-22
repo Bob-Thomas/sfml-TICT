@@ -33,6 +33,7 @@ public:
 
     void input(sf::Event& e){}
 
+    void write(std::ofstream &s) {}
 
     sf::Vector2f getPosition() const;
 

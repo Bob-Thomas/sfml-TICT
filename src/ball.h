@@ -12,6 +12,8 @@
 #include "movable_entity.h"
 #include "selectable.h"
 #include "helpers.h"
+#include "colors.h"
+#include <fstream>
 
 class ball : public selectable {
 private:
@@ -20,12 +22,12 @@ private:
     sf::Vector2f velocity;
     sf::Color color;
     float speed = 2;
-    float size;
+    int radius;
 
 public:
 
 
-    ball(sf::Vector2f position, sf::Vector2f velocity, sf::Color color, float size = 30.0);
+    ball(sf::Vector2f position, sf::Vector2f velocity, sf::Color color, int radius = 30);
 
     void draw(sf::RenderWindow &window) const;
 
@@ -45,12 +47,25 @@ public:
 
     void setVelocity(sf::Vector2f velocity);
 
-    void move(sf::Vector2f pos) {
-        circle.setPosition(pos);
+    void move(sf::Vector2f position) {
+        this->position = position;
+        circle.setPosition(position);
     }
 
     sf::Vector2f getVelocity();
 
+    void write(std::ofstream &s) {
+        s << "(" << position.x << "," << position.y << ") ";
+        s << "CIRCLE ";
+        for(auto c : colors) {
+            if(c.color == color) {
+                s << c.name << " ";
+                break;
+            }
+        }
+        s << radius;
+
+    }
 };
 
 #endif //SFML_DEMO_BALL_H
