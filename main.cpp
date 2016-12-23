@@ -57,7 +57,7 @@ int main() {
             word += c;
         }
         else {
-            if(word != "") {
+            if (word != "") {
                 if (words.find(word.c_str()) == words.end()) {
                     words.insert(std::pair<std::string, int>(word, 0));
                 } else {
@@ -65,14 +65,18 @@ int main() {
                 }
                 word = "";
             }
-        }});
+        }
+    });
     std::vector<std::pair<std::string, int>> mapVector(words.size());
     std::copy(words.begin(), words.end(), mapVector.begin());
 
-    std::sort(mapVector.begin(), mapVector.end(), [&](std::pair<std::string, int>  a, std::pair<std::string, int>  b){return a.second != b.second?  a.second > b.second : a.first > b.first; });
+    std::sort(mapVector.begin(), mapVector.end(), [&](std::pair<std::string, int> a, std::pair<std::string, int> b) {
+        return a.second != b.second ? a.second > b.second : a.first > b.first;
+    });
 
-    std::for_each(mapVector.begin(), mapVector.begin()+10, [&](std::pair<std::string, int> a) { std::cout << a.first << " : " << a.second << "\n";});
+    std::for_each(mapVector.begin(), mapVector.begin() + 10,
+                  [&](std::pair<std::string, int> a) { std::cout << a.first << " : " << a.second << "\n"; });
 
 
-        return EXIT_SUCCESS;
-    }
+    return EXIT_SUCCESS;
+}
