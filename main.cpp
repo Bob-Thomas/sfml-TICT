@@ -1,192 +1,78 @@
-#include<SFML/Graphics.hpp>
+#include <vector>
 #include <fstream>
-#include"src/ball.h"
-#include "src/action.h"
-#include "src/draggable_square.h"
-#include "src/draggable_line.h"
-#include "src/draggable_photo.h"
+#include <iostream>
+#include <algorithm>
+#include <map>
 #include "src/exceptions.h"
 
-sf::Vector2f Vector2f_from_Vector2i(sf::Vector2i vector2);
-
 /**
- * 18.3. Week 3 : Factory
-Maak een klasse hierargie van beweegbare scherm objecten. Handel het selecteren en bewegen af in de superklasse.
-
-Maak een factory function die scherm objecten creeert: circle, rectangle, line, picture. Ieder object heeft een positie, en behalve picture ook nog een kleur, circle heeft een diameter, en line en rectange een tweede punt (positie is het eerste punt). Check alle fouten die kunnen optreden en genereer daarvoor passende exceptions. Let ook op einde-file.
-
-Maak een applicatie die
-De objecten lees uit een text file en toont,
-Je de gelegenheid biedt ze te slecteren en te verschuiven,
-Bij het afsluiten de textfile overschrijft met de nieuwe lijst van objecten.
-
-Sla de (pointers naar) de objecten op in een container waar je tijdens het afbeelden en afhandeklen van gebruikershandelingen met een for( : ) loop doorheen loopt.
-
-Let op wat je doet als er een fout wordt geconstateerd in de textfile. Zorg er in ieder geval voor dat de gebruiker duidelijk te zien krijgt wat de fout is, en dat de textfile niet overschreven wordt.
-
-
-(50,60) CIRCLE blue 10
-(10,10) RECTANGLE red (30,40)
-(110, 50) PICTURE bird.jpg
-
+    Haal van project gutenberg de txt versie van de King Jame’s Bible.
+    1.	Lees alle characters van deze file in een vector.
+    2.	Print hoeveel characters de file bevat (vraag het aan de vector).
+    3.	Print hoeveel regels de file bevat (gebruik de vector en een STL algorithme).
+    4.	Print hoeveel alfabetische characters de file bevat (vector + algorithme).
+    5.	Zet de letters in de vector om in kleine letters (max 3 regels code).
+    6.	Tel in een lijst voor iedere letter (a..z) hoe vaak hij voorkomt in de vector (diverse manieren mogelijk).
+    7.	Druk deze lijst af 1) op lettervolgorde 2) op hoe vaak een letter voorkomt (gebruikt een algoritme).
+    8.	Bepaal welke woorden er in de tekst voorkomen en druk de 10 meest voorkomende woorden af. Een woord is aaneengesloten reeks letters. (gebruik een map)
  */
-
-std::ifstream &operator>>(std::ifstream &input, sf::Vector2f &rhs) {
-    char c;
-    if (!(input >> c)) { throw end_of_file(); }
-    if (c != '(') { throw invalid_position(c); }
-
-    if (!(input >> rhs.x)) {
-        throw invalid_position(c);
-    }
-
-    if (!(input >> c)) {
-        throw (invalid_character(c));
-    }
-    if (!(input >> rhs.y)) {
-        throw (invalid_position(c));
-    }
-
-    if (!(input >> c)) {
-        throw (invalid_character(c));
-    }
-    if (c != ')') { throw invalid_position(c); }
-
-    return input;
-}
-
-std::ifstream &operator>>(std::ifstream &input, sf::Color &rhs) {
-    std::string s;
-    input >> s;
-    for (auto const &color : colors) {
-        if (color.name == s) {
-            rhs = color.color;
-            return input;
-        }
-    }
-    if (s == "") {
-        throw end_of_file();
-    }
-    throw unknown_color(s);
-}
-
-entity *screen_object_read(std::ifstream &input) {
-    sf::Vector2f position;
-    std::string name;
-    input >> position >> name;
-
-    if (name == "CIRCLE") {
-        int radius;
-        sf::Color color;
-        input >> color;
-        input >> radius;
-        return new ball(position, {0, 0}, color, radius);
-
-    }
-    else if (name == "LINE") {
-        sf::Color color;
-        input >> color;
-        return new draggable_line(position, color);
-    }
-    else if (name == "RECTANGLE") {
-        sf::Vector2f size;
-        sf::Color color;
-        input >> color;
-        input >> size;
-        return new draggable_square(position, size, color);
-
-    } else if (name == "PICTURE") {
-        std::string src;
-        input >> src;
-        src = src;
-        return new draggable_photo(src, position, {1, 1});
-
-    } else if (name == "") {
-        throw end_of_file();
-    }
-
-    throw unknown_shape(name);
-}
-
 int main() {
+    std::vector<char> bibleChars;
+    std::string file_name("assets/bible.txt");
+    std::ifstream input(file_name);
+    std::map<std::string, int> words;
+    std::string word;
 
-    sf::RenderWindow window{sf::VideoMode{1920, 1080}, "Game"};
-    std::string file("./assets/config/objects.magic");
-
-    sf::Event event;
-
-    std::vector<entity *> entities = std::vector<entity *>();
-
-    {
-        std::ifstream input(file);
-        if (!input.good()) {
-            throw (unknown_file(file));
+    if (!input.good()) {
+        throw (unknown_file(file_name));
+    }
+    try {
+        char c;
+        while (input.get(c)) {
+            bibleChars.push_back(c);
         }
-        try {
-            for (; ;) {
-                entities.push_back(screen_object_read(input));
-            }
-        } catch (end_of_file) {
-            std::cout << "\nEOF\n";
-            // do nothing
-        } catch (std::exception &problem) {
-            std::cout << problem.what();
-        }
-        input.close();
+    } catch (end_of_file) {
+        std::cout << "EOF";
+    } catch (std::exception &problem) {
+        std::cout << problem.what();
+    }
+    input.close();
+
+    std::cout << "amount of chars: " << bibleChars.size() << "\n";
+
+    //http://en.cppreference.com/w/cpp/algorithm/count
+    std::cout << "amount of lines: " << std::count(bibleChars.begin(), bibleChars.end(), '\n') << "\n";
+    std::cout << "amount of alphabetical chars: " << std::count_if(bibleChars.begin(), bibleChars.end(), isalpha) <<
+    "\n";
+    std::cout << "amount of uppercase chars: " << std::count_if(bibleChars.begin(), bibleChars.end(), isupper) << "\n";
+    std::for_each(bibleChars.begin(), bibleChars.end(), [](char &c) { if (isalpha(c)) { c = tolower(c); }});
+    std::cout << "amount of uppercase chars: " << std::count_if(bibleChars.begin(), bibleChars.end(), isupper) << "\n";
+    for (char l = 'a'; l <= 'z'; ++l) {
+        std::cout << l << " komt " <<
+        std::count_if(bibleChars.begin(), bibleChars.end(), [&](char &c) { return l == c; }) << " voor\n";
     }
 
-    sf::Clock clock;
-    sf::Time elapsed = clock.restart();
-
-    //60 FPS master race
-    const sf::Time update_ms = sf::seconds(1.f / 60.f);
-
-    while (window.isOpen()) {
-        while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed) {
-                std::ofstream output("./assets/config/objects.magic");
-                for (entity *e : entities) {
-                    e->write(output);
-                    output << "\n";
+    std::for_each(bibleChars.begin(), bibleChars.end(), [&](char &c) {
+        if (c != ' ' && isalpha(c)) {
+            word += c;
+        }
+        else {
+            if(word != "") {
+                if (words.find(word.c_str()) == words.end()) {
+                    words.insert(std::pair<std::string, int>(word, 0));
+                } else {
+                    words[word]++;
                 }
-                output.close();
-                window.close();
+                word = "";
             }
-            if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Right) {
-                bool test = false;
-                entity *teste;
-                for(entity *e : entities) {
-                    if (e->getBounds().contains(sf::Vector2f(event.mouseButton.x, event.mouseButton.y))) {
-                        test = true;
-                        teste = e;
-                        break;
-                    }
-                }
-                if(test)
-                    entities.erase(std::remove(entities.begin(), entities.end(), teste), entities.end());
-                else
-                    entities.push_back(new ball(sf::Vector2f(event.mouseButton.x, event.mouseButton.y), {0, 0}, sf::Color::Red,30));
+        }});
+    std::vector<std::pair<std::string, int>> mapVector(words.size());
+    std::copy(words.begin(), words.end(), mapVector.begin());
 
-            }
-            for (entity *e: entities) {
-                e->input(event);
-            }
-        }
-        elapsed += clock.restart();
-        while (elapsed >= update_ms) {
-            float delta = update_ms.asSeconds();
-            for (entity *e: entities) {
-                e->update(delta);
-            }
+    std::sort(mapVector.begin(), mapVector.end(), [&](std::pair<std::string, int>  a, std::pair<std::string, int>  b){return a.second != b.second?  a.second > b.second : a.first > b.first; });
 
-            elapsed -= update_ms;
-        }
-        window.clear();
-        for (entity *e : entities) {
-            e->draw(window);
-        }
-        window.display();
+    std::for_each(mapVector.begin(), mapVector.begin()+10, [&](std::pair<std::string, int> a) { std::cout << a.first << " : " << a.second << "\n";});
+
+
+        return EXIT_SUCCESS;
     }
-
-    return EXIT_SUCCESS;
-}
