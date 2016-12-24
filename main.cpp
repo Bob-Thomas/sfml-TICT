@@ -1,81 +1,182 @@
-#include <vector>
-#include <fstream>
+#include <stack>
 #include <iostream>
-#include <algorithm>
-#include <map>
-#include "src/exceptions.h"
+#include <vector>
+#include <assert.h>
+#include <SFML/Graphics.hpp>
 
 /**
-    Haal van project gutenberg de txt versie van de King Jame’s Bible.
-    1.	Lees alle characters van deze file in een vector.
-    2.	Print hoeveel characters de file bevat (vraag het aan de vector).
-    3.	Print hoeveel regels de file bevat (gebruik de vector en een STL algorithme).
-    4.	Print hoeveel alfabetische characters de file bevat (vector + algorithme).
-    5.	Zet de letters in de vector om in kleine letters (max 3 regels code).
-    6.	Tel in een lijst voor iedere letter (a..z) hoe vaak hij voorkomt in de vector (diverse manieren mogelijk).
-    7.	Druk deze lijst af 1) op lettervolgorde 2) op hoe vaak een letter voorkomt (gebruikt een algoritme).
-    8.	Bepaal welke woorden er in de tekst voorkomen en druk de 10 meest voorkomende woorden af. Een woord is aaneengesloten reeks letters. (gebruik een map)
+ Schrijf een Tic-Tac-Toe (3-op-een-rij) spelletje.
+ Maak hiertoe een object voor het spel en een object voor een zet (command pattern).
+ Sla het verloop van het spel op in een STL container.
+ Implementeer een ‘undo’ feature door het her-afspelen van de gedane zetten behalve de laatste.
+ Biedt, met zo min mogelijk code duplicatie, zowel een grafische (SFML) interface als een tekst-only interface.
  */
-int main() {
-    std::vector<char> bibleChars;
-    std::string file_name("assets/bible.txt");
-    std::ifstream input(file_name);
-    std::map<std::string, int> words;
-    std::string word;
 
-    if (!input.good()) {
-        throw (unknown_file(file_name));
-    }
-    try {
-        char c;
-        while (input.get(c)) {
-            bibleChars.push_back(c);
+typedef std::vector<std::vector<int>> board_type;
+
+class command {
+    public:
+        virtual void execute() = 0;
+
+        virtual void undo() = 0;
+};
+
+
+class game {
+        std::stack<command *> commands;
+        board_type board{{0, 0, 0},
+                         {0, 0, 0},
+                         {0, 0, 0}};
+        int turn = 1;
+        bool running;
+    public:
+        game() { };
+
+        void run() {
+            board = {{0, 0, 0},
+                     {0, 0, 0},
+                     {0, 0, 0}};
+            running = 1;
         }
-    } catch (end_of_file) {
-        std::cout << "EOF";
-    } catch (std::exception &problem) {
-        std::cout << problem.what();
-    }
-    input.close();
 
-    std::cout << "amount of chars: " << bibleChars.size() << "\n";
-
-    //http://en.cppreference.com/w/cpp/algorithm/count
-    std::cout << "amount of lines: " << std::count(bibleChars.begin(), bibleChars.end(), '\n') << "\n";
-    std::cout << "amount of alphabetical chars: " << std::count_if(bibleChars.begin(), bibleChars.end(), isalpha) <<
-    "\n";
-    std::cout << "amount of uppercase chars: " << std::count_if(bibleChars.begin(), bibleChars.end(), isupper) << "\n";
-    std::for_each(bibleChars.begin(), bibleChars.end(), [](char &c) { if (isalpha(c)) { c = tolower(c); }});
-    std::cout << "amount of uppercase chars: " << std::count_if(bibleChars.begin(), bibleChars.end(), isupper) << "\n";
-    for (char l = 'a'; l <= 'z'; ++l) {
-        std::cout << l << " komt " <<
-        std::count_if(bibleChars.begin(), bibleChars.end(), [&](char &c) { return l == c; }) << " voor\n";
-    }
-
-    std::for_each(bibleChars.begin(), bibleChars.end(), [&](char &c) {
-        if (c != ' ' && isalpha(c)) {
-            word += c;
+        void stop() {
+            running = 0;
         }
-        else {
-            if (word != "") {
-                if (words.find(word.c_str()) == words.end()) {
-                    words.insert(std::pair<std::string, int>(word, 0));
-                } else {
-                    words[word]++;
+
+        void print_board() {
+            for (int i = 0; i < board.size(); i++) {
+                for (int j = 0; j < board.size(); j++) {
+                    if (board[i][j] == 1) {
+                        std::cout << "X ";
+                    } else if (board[i][j] == 2) {
+                        std::cout << "O ";
+                    } else {
+                        std::cout << "- ";
+                    }
                 }
-                word = "";
+                std::cout << "\n";
+            }
+            std::cout << "\n";
+        }
+
+        void place(command *c) {
+            c->execute();
+            commands.push(c);
+        }
+
+        int get_winner(int row, int col) {
+            if (
+                    (board[row][0] == get_turn() && board[row][1] == get_turn() && board[row][2] == get_turn()) ||
+                    (board[0][col] == get_turn() && board[1][col] == get_turn() && board[2][col] == get_turn()) ||
+
+                    ((board[0][0] == get_turn() && board[1][1] == get_turn() && board[2][2] == get_turn())) ||
+                    (board[0][2] == get_turn() && board[1][1] == get_turn() && board[2][0] == get_turn())) {
+                stop();
+                return get_turn();
+            }
+            return -1;
+        }
+
+
+        void undo() {
+            if (commands.size() > 0) {
+                command *c = commands.top();
+                c->undo();
+                commands.pop();
             }
         }
-    });
-    std::vector<std::pair<std::string, int>> mapVector(words.size());
-    std::copy(words.begin(), words.end(), mapVector.begin());
 
-    std::sort(mapVector.begin(), mapVector.end(), [&](std::pair<std::string, int> a, std::pair<std::string, int> b) {
-        return a.second != b.second ? a.second > b.second : a.first > b.first;
-    });
+        board_type get_board() {
+            return board;
+        }
 
-    std::for_each(mapVector.begin(), mapVector.begin() + 10,
-                  [&](std::pair<std::string, int> a) { std::cout << a.first << " : " << a.second << "\n"; });
+        void set_board(board_type &b) {
+            board = b;
+        }
+
+        void set_board_value(int row, int col, int value) {
+            assert(board[row][col] != value);
+            board[row][col] = value;
+            if (get_winner(row, col) > 0) {
+                std::cout << "winner player " << get_turn() << "\n";
+            }
+        }
+
+        void switch_turn() {
+            if (turn == 1) {
+                turn = 2;
+            } else {
+                turn = 1;
+            }
+        }
+
+        int get_turn() {
+            return turn;
+        }
+
+        bool is_running() {
+            return running;
+        }
+};
+
+
+class test_command : public command {
+        int previous_value;
+        int previous_turn;
+        int row, col;
+        game &g;
+    public:
+        test_command(game &g, int row, int col) : g(g), row(row), col(col) {
+            previous_value = g.get_board()[row][col];
+            previous_turn = g.get_turn();
+        };
+
+        virtual void execute() {
+            g.set_board_value(row, col, g.get_turn());
+            g.switch_turn();
+            g.print_board();
+        }
+
+        virtual void undo() {
+            g.set_board_value(row, col, previous_value);
+            g.switch_turn();
+            g.print_board();
+        }
+};
+
+#define GRAPHICAL 1
+
+int main() {
+    game g;
+
+
+    std::string decision;
+    g.run();
+    if (GRAPHICAL == 0) {
+        g.print_board();
+        std::cout << "Do a move by typing the position like (0,1) \n type undo to undo your turn0";
+        while (g.is_running()) {
+            std::cout << "it's player " << g.get_turn() << " his turn\n";
+            std::cin >> decision;
+            if (decision == "undo") {
+                g.undo();
+            } else {
+                g.place(new test_command(g, decision[0] - 48, decision[1] - 48));
+            }
+        }
+    } else {
+        sf::RenderWindow window{sf::VideoMode{640, 480}, "Game"};
+        sf::vector<
+        while (window.isOpen()) {
+            sf::Event event;
+            while (window.pollEvent(event)) {
+                if (event.type == sf::Event::Closed)
+                    window.close();
+            }
+            window.clear();
+            window.display();
+        }
+    }
 
 
     return EXIT_SUCCESS;

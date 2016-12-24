@@ -18,7 +18,7 @@ include_directories("${PROJECT_BINARY_DIR}")
 SET(BOOST_ROOT "C:/local/boost_1_62_0")
 # Define sources and executable
 set(EXECUTABLE_NAME "sfml-demo")
-add_executable(${EXECUTABLE_NAME} main.cpp src/exceptions.h)
+add_executable(${EXECUTABLE_NAME} main.cpp)
 
 
 # Detect and add SFML
