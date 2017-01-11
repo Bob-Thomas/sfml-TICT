@@ -21,6 +21,7 @@ int main() {
     std::string file_name("assets/bible.txt");
     std::ifstream input(file_name);
     std::map<std::string, int> words;
+    std::map<char, int> chars;
     std::string word;
 
     if (!input.good()) {
@@ -47,11 +48,24 @@ int main() {
     std::cout << "amount of uppercase chars: " << std::count_if(bibleChars.begin(), bibleChars.end(), isupper) << "\n";
     std::for_each(bibleChars.begin(), bibleChars.end(), [](char &c) { if (isalpha(c)) { c = tolower(c); }});
     std::cout << "amount of uppercase chars: " << std::count_if(bibleChars.begin(), bibleChars.end(), isupper) << "\n";
-    for (char l = 'a'; l <= 'z'; ++l) {
-        std::cout << l << " komt " <<
-        std::count_if(bibleChars.begin(), bibleChars.end(), [&](char &c) { return l == c; }) << " voor\n";
-    }
 
+    std::cout << "letters sorted on alphabet\n";
+    for (char l = 'a'; l <= 'z'; ++l) {
+        int count = std::count_if(bibleChars.begin(), bibleChars.end(), [&](char &c) { return l == c; });
+        std::cout << l << " komt " << count << " voor\n";
+        chars.insert(std::pair<char, int>(l, count));
+    }
+    std::cout << "letters sorted on size\n";
+    std::vector<std::pair<char, int>> charMapVector(chars.size());
+    std::copy(chars.begin(), chars.end(), charMapVector.begin());
+    std::sort(charMapVector.begin(), charMapVector.end(), [](std::pair<char, int> a, std::pair<char, int> b) {
+        return a.second != b.second ? a.second > b.second : a.first > b.first;
+    });
+    std::for_each(charMapVector.begin(), charMapVector.end(),
+                  [](std::pair<char, int> a) { std::cout << a.first << " : " << a.second << "\n"; });
+
+
+    std::cout << "10 Most used words\n";
     std::for_each(bibleChars.begin(), bibleChars.end(), [&](char &c) {
         if (c != ' ' && isalpha(c)) {
             word += c;
